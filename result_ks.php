@@ -362,15 +362,17 @@ else{
 }
 
 $p2pmid=array();
-        $table_k= "<table id=\"kinase_view\" class=\"bordered\" ><col width=\"20%\"><col width=\"20%\"><col width=\"25%\">
+        $table_k= "<table id=\"kinase_view\" class=\"bordered\" ><col width=\"25%\"><col width=\"25%\"><col width=\"30%\"><col width=\"20%\">
 
         <tr> 
                <th>Kinase</th>
 
                <th>Substrate</th>
                <th>PMID</th>
+               <th title='Click the links to get Co-occurred Sentences'>Co-occurred Sentences</th>
+
         </tr>";
-        $table_s= "<table id=\"substrate_view\" class=\"bordered\" style=\"display: none\"><col width=\"20%\"><col width=\"20%\"><col width=\"25%\"><col width=\"10%\">
+        $table_s= "<table id=\"substrate_view\" class=\"bordered\" style=\"display: none\"><col width=\"25%\"><col width=\"25%\"><col width=\"30%\"><col width=\"20%\">
 
         <tr> 
                <th>Substrate</th>
@@ -568,6 +570,9 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                                 }
 
                                 $piece.= "</td>";
+                                $substrate_URL=$Enrich_Entrez_array[$key];
+                                $kinase_URL=$Enrich_Entrez_array[$ss];
+                                $piece .="<td><a href=\"test_sentence.php?kinase=$kinase_URL&substrate=$substrate_URL\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
                                 if ($value!=end($s2pmid)){
                                     $piece.= "</tr><tr>";
                                 }
