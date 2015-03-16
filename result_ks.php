@@ -244,6 +244,7 @@ $Enrich_Entrez_array=array(); //array for Short name to entrez ID
 $Enrich_ratio_array=array();   //array for entrezID to expression ratio
 $No_array=array(); //array for genes with no result
 $Enrich_UU_array=array();
+$shortName2color=array(); //key: short name  value: colored triangle
 
 
 
@@ -265,7 +266,6 @@ class MyDB extends SQLite3
       echo $db->lastErrorMsg();
    } 
 
-$shortName2color=array(); //key: short name  value: colored triangle
 for ($i=0; $i<sizeof($enriched_lines); $i++){
 
         $data=explode("\t",$enriched_lines[$i]);
@@ -274,33 +274,37 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
         $L=(float)$data[1];
         // $Enrich_array[$E]=$L;
         // $shortNameSql ="select ShortName,EntrezOrtholog,UniprotOrtholog from Orthologs where EntrezID=$E limit 1";      
+        $found_row=false; //flag for check whether there is result of the query for this EntrezID
         $shortNameSql ="select ShortName,UniprotOrtholog from Orthologs where EntrezID=$E limit 1";      
 
         $shortName = $db->query($shortNameSql);
         if ($shortName){
 
-
             while($row = $shortName->fetchArray()){
-                $ss=strtoupper($row['ShortName']);
-                $Enrich_array[$E]=$ss;
-                $Enrich_Entrez_array[$ss]=$E;
-                $Enrich_ratio_array[$E]=$L;
-                $UU=$row['UniprotOrtholog'];
+                $found_row=true;
+                if (isset($row)){
+                    $ss=strtoupper($row['ShortName']);
+                    $Enrich_array[$E]=$ss;
+                    $Enrich_Entrez_array[$ss]=$E;
+                    $Enrich_ratio_array[$E]=$L;
+                    $UU=$row['UniprotOrtholog'];
+                    if (!empty($UU)){
 
-                if (!empty($UU)){
-                    $UU_list=explode(",",$UU);
+                        $UU_list=explode(",",$UU);
 
-                    // $Enrich_UU_array=$Enrich_UU_array+$UU_list;
-                    $Enrich_UU_array=array_merge($Enrich_UU_array,$UU_list);
+                        // $Enrich_UU_array=$Enrich_UU_array+$UU_list;
+                        $Enrich_UU_array=array_merge($Enrich_UU_array,$UU_list);
+                    }
                 }
+                
 
-
+            }
+            if($found_row==false){
+                array_push($No_array, $E);
             }
 
         }
-        else{
-            array_push($No_array, $E);
-        }
+        
 
         if (is_numeric($upRatio)||is_numeric($downRatio)){
             if (!is_numeric($upRatio)){
@@ -357,11 +361,11 @@ if(sizeof($enriched_lines)==1){
     $total=0;
 }
 else{
-    $total=sizeof($enriched_lines)-1;
+    $total=sizeof($enriched_lines);
 
 }
 
-$p2pmid=array();
+$p2pmid=array();//gene names that have reuslt in this analysis.
         $table_k= "<table id=\"kinase_view\" class=\"bordered\" ><col width=\"25%\"><col width=\"25%\"><col width=\"30%\"><col width=\"20%\">
 
         <tr> 
@@ -455,7 +459,9 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                             foreach ($k2pmid as $key=>$value){
                                 $k2pmid[$key]=array_unique($k2pmid[$key]);
                                 if (!in_array($key, $p2pmid)){
-                                    array_push($p2pmid,$key);
+                                    if (in_array($key, $Enrich_array)){
+                                        array_push($p2pmid,$key);
+                                    }
                                 }
                             }
                             if (in_array($kk_AC, $UUArray)&&($source!='psp')){
@@ -479,12 +485,18 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                                 }
 
                                 // array_push($subAray,$substrate);
-                            }               
+                            }
+                            // elseif(!in_array($EntrezID, $No_array)){
+                            //     array_push($No_array, $EntrezID);
+                            // }             
                         
                             foreach ($s2pmid as $key=>$value){
                                 $s2pmid[$key]=array_unique($s2pmid[$key]);
                                 if (!in_array($key, $p2pmid)){
-                                    array_push($p2pmid,$key);
+                                    if (in_array($key, $Enrich_array)){
+
+                                        array_push($p2pmid,$key);
+                                    }
                                 }
                             }
                             if ($source=="rlim"){
@@ -787,6 +799,11 @@ $table_k.=$piece_up.$piece_down.$piece_mid;
 $table_s.=$piece_up_s.$piece_down_s.$piece_mid_s;
 $table_k.="</table>";
 $table_s.="</table>";
+foreach($Enrich_array as $k=>$v){
+    if (!in_array($v,$p2pmid)){
+        array_push($No_array, $k);
+    }
+}
 $table_n="<table id=\"no_result\" class=\"bordered\" style=\"display: none\"><col width=\"100%\">
 
         <tr> 
@@ -816,8 +833,9 @@ $_SESSION['session_download']=$session_download;
 // </div>";
 $db->close();
 
+
 $given=sizeof($p2pmid);
-// echo $given;
+
 // Testing numbers. Replace with your own.
 $value = $given;
 $max = $total;
