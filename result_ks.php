@@ -205,7 +205,8 @@ $_SESSION['downRatio']=$downRatio;
     <!-- <div style="width:30px;height:7px;border:1px solid #666666; background:#FF0000 "></div> -->
     <?php
         echo "Down-regulated:<font color=\"#088A08\"> &#9660; </font><br>";
-        echo "<a href=\"http://research.bioinformatics.udel.edu/rlimsp/\" target=\"_blank\">RLIMS-P</a>: A Rule-based Literature Mining System for Protein Phosphorylation";
+        echo "<a href=\"http://research.bioinformatics.udel.edu/rlimsp/\" target=\"_blank\">RLIMS-P</a>: A Rule-based Literature Mining System for Protein Phosphorylation.<br>";
+        echo "Please note this result is species agnostic.";
 
     ?>
 
