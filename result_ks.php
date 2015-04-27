@@ -206,7 +206,7 @@ $_SESSION['downRatio']=$downRatio;
     <?php
         echo "Down-regulated:<font color=\"#088A08\"> &#9660; </font><br>";
         echo "<a href=\"http://research.bioinformatics.udel.edu/rlimsp/\" target=\"_blank\">RLIMS-P</a>: A Rule-based Literature Mining System for Protein Phosphorylation.<br>";
-        echo "Please note this result is species agnostic.";
+        echo "Please note this result is non-species-specific.";
 
     ?>
 
@@ -351,7 +351,7 @@ function getUpDown($color){
         return $regulate="down-regulated";
     }
     elseif ($color==""){
-        return $regulate="neutural";
+        return $regulate="neutral";
     }
     else{
         return $regulate="up-regulated";
@@ -373,8 +373,8 @@ $p2pmid=array();//gene names that have reuslt in this analysis.
                <th>Kinase</th>
 
                <th>Substrate</th>
-               <th>PMID</th>
-               <th title='Click the links to get Co-occurred Sentences'>Co-occurred Sentences</th>
+               <th>Kinase-Substrate Evidence</th>
+               <th title='Click the links to get Co-occurred Sentences'>Co-occurring Sentences</th>
 
         </tr>";
         $table_s= "<table id=\"substrate_view\" class=\"bordered\" style=\"display: none\"><col width=\"25%\"><col width=\"25%\"><col width=\"30%\"><col width=\"20%\">
@@ -383,8 +383,8 @@ $p2pmid=array();//gene names that have reuslt in this analysis.
                <th>Substrate</th>
 
                <th>Kinase</th>
-               <th>PMID</th>
-               <th title='Click the links to get Co-occurred Sentences'>Co-occurred Sentences</th>
+               <th>Kinase-Substrate Evidence</th>
+               <th title='Click the links to get Co-occurred Sentences'>Co-occurring Sentences</th>
         </tr>";
         $session_download="";
         // $piece_k="";
@@ -525,7 +525,7 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                             // $piece_up="";
                             // $piece_down="";
                             $piece="";
-                            $piece.= "<tr><td rowspan=".$rowspan."><a class='tooltip' title='More about $ss at:   <a href=\"http://www.ncbi.nlm.nih.gov/gquery/?term=$ss\">NCBI</a>   <a href=\"http://www.uniprot.org/uniprot/?query=name%3A$ss+OR+gene%3A$ss&sort=score\">UniProt</a>'>$ss </a>$colorss</td>";
+                            $piece.= "<tr><td rowspan=".$rowspan."><a class='tooltip' title='More about $ss at:   <a href=\"http://www.ncbi.nlm.nih.gov/gquery/?term=$ss\" target=\"_blank\">NCBI</a>   <a href=\"http://www.uniprot.org/uniprot/?query=name%3A$ss+OR+gene%3A$ss&sort=score\" target=\"_blank\">UniProt</a>'>$ss </a>$colorss</td>";
                             // $piece.= "<div class=\"dialog\" style=\"display:none\"><p>$ss<p></div></td>";
                             
                             foreach ($s2pmid as $key=>$value){
@@ -533,7 +533,7 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                                 $color=$shortName2color[$key];
                                 // echo $key;
                                 $piece.= "<td>
-                                        <a class='tooltip' title='More about $key at:   <a href=\"http://www.ncbi.nlm.nih.gov/gquery/?term=$key\">NCBI</a>   <a href=\"http://www.uniprot.org/uniprot/?query=name%3A$key+OR+gene%3A$key&sort=score\">UniProt</a>'>$key </a>
+                                        <a class='tooltip' title='More about $key at:   <a href=\"http://www.ncbi.nlm.nih.gov/gquery/?term=$key\" target=\"_blank\">NCBI</a>   <a href=\"http://www.uniprot.org/uniprot/?query=name%3A$key+OR+gene%3A$key&sort=score\" target=\"_blank\">UniProt</a>'>$key </a>
                                         $color
                                         </td>";
                                 $piece.= "<td class=\"inside\">";
@@ -585,7 +585,33 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                                 $piece.= "</td>";
                                 $substrate_URL=$Enrich_Entrez_array[$key];
                                 $kinase_URL=$Enrich_Entrez_array[$ss];
-                                $piece .="<td><a href=\"test_sentence.php?kinase=$kinase_URL&substrate=$substrate_URL\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
+
+
+                                $kinaseSQL ="select UDID from GeneIDs where EntrezID=$kinase_URL limit 1";      
+
+                                $kinaseConnect = $db->query($kinaseSQL);
+                                if ($kinaseConnect){
+
+                                    while($row = $kinaseConnect->fetchArray()){
+                                        $kinaseUDID=$row['UDID'];
+                                    }
+
+                                }
+
+                                $substrateSQL ="select UDID from GeneIDs where EntrezID=$substrate_URL limit 1";      
+
+                                $substrateConnect = $db->query($substrateSQL);
+                                if ($substrateConnect){
+
+                                    while($row = $substrateConnect->fetchArray()){
+                                        $substrateUDID=$row['UDID'];
+                                    }
+
+                                }
+                                $piece .="<td><a href=\"http://biotm1.cis.udel.edu/eGIFT_APIs/form/form3/form_udid_udid_sentences.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
+
+
+                                // $piece .="<td><a href=\"test_sentence.php?kinase=$kinase_URL&substrate=$substrate_URL\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
                                 if ($value!=end($s2pmid)){
                                     $piece.= "</tr><tr>";
                                 }
@@ -764,7 +790,31 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                                 $piece.= "</td>";
                                 $kinase_URL=$Enrich_Entrez_array[$key];
                                 $substrate_URL=$Enrich_Entrez_array[$ss];
-                                $piece .="<td><a href=\"test_sentence.php?kinase=$kinase_URL&substrate=$substrate_URL\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
+
+                                $kinaseSQL ="select UDID from GeneIDs where EntrezID=$kinase_URL limit 1";      
+
+                                $kinaseConnect = $db->query($kinaseSQL);
+                                if ($kinaseConnect){
+
+                                    while($row = $kinaseConnect->fetchArray()){
+                                        $kinaseUDID=$row['UDID'];
+                                    }
+
+                                }
+
+                                $substrateSQL ="select UDID from GeneIDs where EntrezID=$substrate_URL limit 1";      
+
+                                $substrateConnect = $db->query($substrateSQL);
+                                if ($substrateConnect){
+
+                                    while($row = $substrateConnect->fetchArray()){
+                                        $substrateUDID=$row['UDID'];
+                                    }
+
+                                }
+                                $piece .="<td><a href=\"http://biotm1.cis.udel.edu/eGIFT_APIs/form/form3/form_udid_udid_sentences.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
+
+                                // $piece .="<td><a href=\"test_sentence.php?kinase=$kinase_URL&substrate=$substrate_URL\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
                                 if ($value!=end($s2pmid)){
                                     $piece.= "</tr><tr>";
                                 }
