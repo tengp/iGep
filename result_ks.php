@@ -608,8 +608,18 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                                     }
 
                                 }
-                                $piece .="<td><a href=\"http://biotm1.cis.udel.edu/eGIFT_APIs/form/form3/form_udid_udid_sentences.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
+                                // $piece .="<td><a href=\"sentence_content.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
+                                if ($kinaseUDID!= $substrateUDID){
+                                    $page=file_get_contents("http://biotm1.cis.udel.edu/eGIFT_APIs/form/form3/form_udid_udid_sentences.php?udid1=$kinaseUDID&udid2=$substrateUDID");
+                                    $page=explode("<br>",$page);
+                                    $sentence=explode(": ",$page[0])[1];
+                                    $piece .="<td><a href=\"sentence_content.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> $sentence </a></td>";
+                                }
+                                else{
+                                    $piece.="<td></td>";
+                                    // $piece .="<td><a href=\"sentence_content.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentences </a></td>";
 
+                                }
 
                                 // $piece .="<td><a href=\"test_sentence.php?kinase=$kinase_URL&substrate=$substrate_URL\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
                                 if ($value!=end($s2pmid)){
@@ -812,9 +822,22 @@ for ($i=0; $i<sizeof($enriched_lines); $i++){
                                     }
 
                                 }
-                                $piece .="<td><a href=\"http://biotm1.cis.udel.edu/eGIFT_APIs/form/form3/form_udid_udid_sentences.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
+                                // $piece .="<td><a href=\"http://biotm1.cis.udel.edu/eGIFT_APIs/form/form3/form_udid_udid_sentences.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a>";
+                                
 
-                                // $piece .="<td><a href=\"test_sentence.php?kinase=$kinase_URL&substrate=$substrate_URL\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
+
+                                if ($kinaseUDID!= $substrateUDID){
+                                    $page=file_get_contents("http://biotm1.cis.udel.edu/eGIFT_APIs/form/form3/form_udid_udid_sentences.php?udid1=$kinaseUDID&udid2=$substrateUDID");
+                                    $page=explode("<br>",$page);
+                                    $sentence=explode(": ",$page[0])[1];
+                                    $piece .="<td><a href=\"sentence_content.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> $sentence </a></td>";
+                                }
+                                else{
+                                    $piece.="<td></td>";
+                                    // $piece .="<td><a href=\"sentence_content.php?udid1=$kinaseUDID&udid2=$substrateUDID\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentences </a></td>";
+
+                                }
+                                // $piece .="<a href=\"test_sentence.php?kinase=$kinase_URL&substrate=$substrate_URL\" target=\"_blank\" title='Click here to get Co-occurred Sentences for gene $ss and $key'> Sentence </a></td>";
                                 if ($value!=end($s2pmid)){
                                     $piece.= "</tr><tr>";
                                 }
